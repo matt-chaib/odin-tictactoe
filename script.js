@@ -1,9 +1,11 @@
 
-const Gameboard = function () {
-    let values = ['X', 'X', 'X', 'O', 'O', 'O', 'X', 'X', 'X']
+const Gameboard = (function () {
+    let values = Array(9).fill("-")
     
-    const createCell = (row, value) => {
+    const createCell = (row, value, index) => {
                 var cell = row.insertCell();
+                cell.addEventListener("click", (event) => {console.log(`${event.target.innerHTML} ${index}`)});
+                cell.classList.add("cell")
                 cell.innerHTML = value
     } 
     
@@ -15,10 +17,11 @@ const Gameboard = function () {
             if (index % 3 == 0) {
                 row = table.insertRow();
             }
-            createCell(row, value)
+            createCell(row, value, index)
         })
 
-        boardElement.appendChild(table)
+        const previous_table = document.getElementById("table")
+        previous_table ? boardElement.replaceChild(previous_table, table) : boardElement.appendChild(table)
         
     }
 
@@ -26,20 +29,45 @@ const Gameboard = function () {
         values[position] =  token
     }
 
-    console.log(printBoard());
+    const moveValid = (position) => {
+        return values[position] === "-"
+    }
 
-    return { setValue, printBoard }
-};
+    return { setValue, printBoard, moveValid }
+})();
 
 const Player = (token) => {
 
-    const makeMove = (position) => {
-        Gameboard.setValue(position, token)
+    const makeMove = (position, board) => {
+        board.setValue(position, token)
     }
+
     return { token, makeMove };
   };
-  
-const player1 = Player('X');
-player1.makeMove(1)
+
+const Game = () => {
+    const player1 = Player('X');
+    const player2 = Player('O');
+
+    const getPlayerMove = (player) => {
+        let input = Number(prompt("Enter a number"))
+        while (!Gameboard.moveValid(input)) {
+            input = Number(prompt("Invalid move. Enter a number"))
+        }
+        player.makeMove(input, Gameboard)
+    }
+
+    const playGame = () => {
+        getPlayerMove(player1)
+        getPlayerMove(player2)
+    }
+
+    playGame();
+
+    return {}
+}
+
+const game = Game()
 
 Gameboard.printBoard();
+
